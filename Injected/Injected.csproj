@@ -41,7 +41,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DependencyInjectionContainer.cs" />
+    <Compile Include="MoreThanOnePublicConstructorException.cs" />
+    <Compile Include="NoPublicConstructorsException.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TypeNotRegisteredException.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
