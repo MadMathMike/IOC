@@ -67,6 +67,23 @@ namespace Injected.Tests
         }
 
         [Fact]
+        public void ResolvesToTheSameInstanceForSingletonRegistrations()
+        {
+            // arrange
+            var container = new DependencyInjectionContainer();
+            container.Register<A, A>(LifecycleType.Singleton);
+
+            // act
+            var a1 = container.Resolve<A>();
+            var a2 = container.Resolve<A>();
+
+            // assert
+            Assert.NotNull(a1);
+            Assert.NotNull(a2);
+            Assert.Equal(a1, a2);
+        }
+
+        [Fact]
         public void ThrowsExceptionWhenResolvingUnregisteredType()
         {
             // arrange

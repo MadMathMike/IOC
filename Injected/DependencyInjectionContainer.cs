@@ -13,19 +13,12 @@ namespace Injected
         private Dictionary<Type, ConstructorInfo> constructors = new Dictionary<Type, ConstructorInfo>();
         private Dictionary<Type, ILifecycleManager> lifecycleManagers = new Dictionary<Type, ILifecycleManager>();
 
-        public void Register<TResolvable, TImplementation>()
+        public void Register<TResolvable, TImplementation>(LifecycleType lifecycleType = LifecycleType.Transient)
             where TResolvable : class
             where TImplementation : TResolvable
         {
-            var lifecycleManager = new TransientLifecycleManager<TResolvable>(() => (TResolvable)this.Resolve(typeof(TResolvable)));
 
-            this.Register<TResolvable, TImplementation>(lifecycleManager);
-        }
-
-        private void Register<TResolvable, TImplementation>(ILifecycleManager lifecycleManager)
-            where TResolvable : class
-            where TImplementation : TResolvable
-        {
+            var resolvableType = typeof(TResolvable);
             var implementationType = typeof(TImplementation);
 
             var constructors = implementationType.GetConstructors();
@@ -40,9 +33,10 @@ namespace Injected
                 throw new MoreThanOnePublicConstructorException(implementationType);
 
             var constructor = constructors.Single();
-            var resolvableType = typeof(TResolvable);
 
             this.constructors.Add(resolvableType, constructor);
+
+            ILifecycleManager lifecycleManager = GetLifeCycleManager<TResolvable>(lifecycleType);
             this.lifecycleManagers.Add(resolvableType, lifecycleManager);
         }
 
@@ -65,6 +59,28 @@ namespace Injected
             var arguments = constructor.GetParameters().Select(p => this.lifecycleManagers[p.ParameterType].GetObject()).ToArray();
 
             return constructor.Invoke(arguments);
-        } 
+        }
+
+        // TODO: Consider moving this method into a different class
+        private ILifecycleManager GetLifeCycleManager<TResolvable>(LifecycleType lifecycleType) where TResolvable : class
+        {
+            ILifecycleManager lifecycleManager = null;
+
+            Func<TResolvable> objectFactory = () => (TResolvable)this.Resolve(typeof(TResolvable));
+
+            switch (lifecycleType)
+            {
+                case LifecycleType.Transient:
+                    lifecycleManager = new TransientLifecycleManager<TResolvable>(objectFactory);
+                    break;
+                case LifecycleType.Singleton:
+                    lifecycleManager = new SingletonLifecycleManager<TResolvable>(objectFactory);
+                    break;
+                default:
+                    throw new NotImplementedException($"Lifecycle type {lifecycleType} has not been implemented.");
+            }
+
+            return lifecycleManager;
+        }
     }
 }

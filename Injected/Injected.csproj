@@ -41,8 +41,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DependencyInjectionContainer.cs" />
-    <Compile Include="ILifecycleManagerFactory.cs" />
     <Compile Include="ILifecycleManager.cs" />
+    <Compile Include="LifecycleType.cs" />
     <Compile Include="MoreThanOnePublicConstructorException.cs" />
     <Compile Include="NoPublicConstructorsException.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
