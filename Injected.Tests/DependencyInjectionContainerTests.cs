@@ -7,7 +7,7 @@ namespace Injected.Tests
     public class DependencyInjectionContainerTests
     {
         [Fact]
-        public void ClassACanBeResolved()
+        public void CanResolveClasses()
         {
             // arrange
             var container = new DependencyInjectionContainer();
@@ -18,6 +18,52 @@ namespace Injected.Tests
 
             // assert
             Assert.NotNull(a);
+        }
+
+        [Fact]
+        public void CanResolveInterfaces()
+        {
+            // arrange
+            var container = new DependencyInjectionContainer();
+            container.Register<IA, A>();
+
+            // act
+            var a = container.Resolve<IA>();
+
+            // assert
+            Assert.NotNull(a);
+        }
+
+        [Fact]
+        public void CanResolveClassesWithDependencies()
+        {
+            // arrange
+            var container = new DependencyInjectionContainer();
+            container.Register<IA, A>();
+            container.Register<B, B>();
+
+            // act
+            var b = container.Resolve<B>();
+
+            // assert
+            Assert.NotNull(b);
+        }
+        
+        [Fact]
+        public void DefaultsToTransientLifetimes()
+        {
+            // arrange
+            var container = new DependencyInjectionContainer();
+            container.Register<A, A>();
+
+            // act
+            var a1 = container.Resolve<A>();
+            var a2 = container.Resolve<A>();
+
+            // assert
+            Assert.NotNull(a1);
+            Assert.NotNull(a2);
+            Assert.NotEqual(a1, a2);
         }
 
         [Fact]

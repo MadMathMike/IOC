@@ -1,6 +1,7 @@
 ﻿namespace Injected.Tests.TestClasses
 {
-    class A : IA
+    class B
     {
+        public B(IA a) { }
     }
 }
