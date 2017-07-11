@@ -41,9 +41,13 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DependencyInjectionContainer.cs" />
+    <Compile Include="ILifecycleManagerFactory.cs" />
+    <Compile Include="ILifecycleManager.cs" />
     <Compile Include="MoreThanOnePublicConstructorException.cs" />
     <Compile Include="NoPublicConstructorsException.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SingletonLifecycleManager.cs" />
+    <Compile Include="TransientLifecycleManager.cs" />
     <Compile Include="TypeNotRegisteredException.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

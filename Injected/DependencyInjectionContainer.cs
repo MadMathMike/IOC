@@ -10,13 +10,23 @@ namespace Injected
     public class DependencyInjectionContainer
     {
         private Dictionary<Type, ConstructorInfo> constructors = new Dictionary<Type, ConstructorInfo>();
+        private Dictionary<Type, ILifecycleManager> lifecycleManagers = new Dictionary<Type, ILifecycleManager>();
 
         public void Register<TResolvable, TImplementation>()
             where TResolvable : class
             where TImplementation : TResolvable
         {
+            var lifecycleManager = new TransientLifecycleManager<TResolvable>(this.Resolve<TResolvable>);
+
+            this.Register<TResolvable, TImplementation>(lifecycleManager);
+        }
+
+        private void Register<TResolvable, TImplementation>(ILifecycleManager lifecycleManager)
+            where TResolvable : class
+            where TImplementation : TResolvable
+        {
             var implementationType = typeof(TImplementation);
-            
+
             var constructors = implementationType.GetConstructors();
 
             // Design assumption: Implementation classes must have only one public constructor. 
@@ -29,8 +39,10 @@ namespace Injected
                 throw new MoreThanOnePublicConstructorException(implementationType);
 
             var constructor = constructors.Single();
+            var resolvableType = typeof(TResolvable);
 
-            this.constructors.Add(typeof(TResolvable), constructor);
+            this.constructors.Add(resolvableType, constructor);
+            this.lifecycleManagers.Add(resolvableType, lifecycleManager);
         }
 
         public TResolvable Resolve<TResolvable>()
@@ -42,11 +54,11 @@ namespace Injected
 
         private object Resolve(Type typeToResolve)
         {
-            if (!constructors.ContainsKey(typeToResolve))
+            if (!this.constructors.ContainsKey(typeToResolve))
                 throw new TypeNotRegisteredException(typeToResolve);
 
             var constructor = constructors[typeToResolve];
-            var arguments = constructor.GetParameters().Select(p => this.Resolve(p.ParameterType)).ToArray();
+            var arguments = constructor.GetParameters().Select(p => this.lifecycleManagers[p.ParameterType].GetObject()).ToArray();
 
             return constructor.Invoke(arguments);
         } 
