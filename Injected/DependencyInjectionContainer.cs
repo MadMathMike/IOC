@@ -9,6 +9,7 @@ namespace Injected
 {
     public class DependencyInjectionContainer
     {
+        // TODO: Find a way to merge these two dictionaries
         private Dictionary<Type, ConstructorInfo> constructors = new Dictionary<Type, ConstructorInfo>();
         private Dictionary<Type, ILifecycleManager> lifecycleManagers = new Dictionary<Type, ILifecycleManager>();
 
@@ -16,7 +17,7 @@ namespace Injected
             where TResolvable : class
             where TImplementation : TResolvable
         {
-            var lifecycleManager = new TransientLifecycleManager<TResolvable>(this.Resolve<TResolvable>);
+            var lifecycleManager = new TransientLifecycleManager<TResolvable>(() => (TResolvable)this.Resolve(typeof(TResolvable)));
 
             this.Register<TResolvable, TImplementation>(lifecycleManager);
         }
@@ -49,7 +50,10 @@ namespace Injected
         {
             var typeToResolve = typeof(TResolvable);
 
-            return (TResolvable)Resolve(typeToResolve);
+            if (!this.lifecycleManagers.ContainsKey(typeToResolve))
+                throw new TypeNotRegisteredException(typeToResolve);
+
+            return (TResolvable)this.lifecycleManagers[typeToResolve].GetObject();
         }
 
         private object Resolve(Type typeToResolve)
