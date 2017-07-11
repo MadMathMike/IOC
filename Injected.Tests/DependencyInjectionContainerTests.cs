@@ -136,5 +136,23 @@ namespace Injected.Tests
                 // Do nothing because this is exactly what we wanted.
             }
         }
+
+        [Fact]
+        public void ThrowsExceptionWhenRegisteringAbstractClass()
+        {
+            // arrange
+            var container = new DependencyInjectionContainer();
+
+            // act
+            try
+            {
+                container.Register<AbstractClass, AbstractClass>();
+                Assert.True(false, $"Type {typeof(AbstractClass)} should not successfully register because it is abstract.");
+            }
+            catch (AbstractClassNotAllowedException)
+            {
+                // Do nothing because this is exactly what we wanted.
+            }
+        }
     }
 }

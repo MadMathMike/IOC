@@ -40,6 +40,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AbstractClassNotAllowedException.cs" />
     <Compile Include="DependencyInjectionContainer.cs" />
     <Compile Include="ILifecycleManager.cs" />
     <Compile Include="LifecycleType.cs" />

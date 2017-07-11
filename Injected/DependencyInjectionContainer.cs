@@ -17,14 +17,16 @@ namespace Injected
             where TResolvable : class
             where TImplementation : TResolvable
         {
-
             var resolvableType = typeof(TResolvable);
             var implementationType = typeof(TImplementation);
 
-            var constructors = implementationType.GetConstructors();
+            if (implementationType.IsAbstract)
+                throw new AbstractClassNotAllowedException(implementationType);
 
             // Design assumption: Implementation classes must have only one public constructor. 
             // My gut says that if there is more than one public constructor, then the dependencies in the class haven't been made very clear.
+            // Side benefit of checking constructors: it ensures the implmentation type is actually a class (instead of an interface or a delegate, for instance).
+            var constructors = implementationType.GetConstructors();
 
             if (constructors.Length == 0)
                 throw new NoPublicConstructorsException(implementationType);
@@ -34,9 +36,9 @@ namespace Injected
 
             var constructor = constructors.Single();
 
-            this.constructors.Add(resolvableType, constructor);
-
             ILifecycleManager lifecycleManager = GetLifeCycleManager<TResolvable>(lifecycleType);
+
+            this.constructors.Add(resolvableType, constructor);
             this.lifecycleManagers.Add(resolvableType, lifecycleManager);
         }
 
