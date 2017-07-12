@@ -1,5 +1,5 @@
 ﻿using Injected.Tests.TestClasses;
-using System;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace Injected.Tests
@@ -91,6 +91,29 @@ namespace Injected.Tests
             // act
             var a1 = container.Resolve<A>();
             var a2 = container.Resolve<A>();
+
+            // assert
+            Assert.NotNull(a1);
+            Assert.NotNull(a2);
+            Assert.Equal(a1, a2);
+        }
+
+        // This test is problematic since I'm basically trying to test a race condition. 
+        // This results in false positives in the sense that this test frequently passes even without
+        // the code that is responsible for making sure the test passes (thread safety in the SingletonLifecycleManager).
+        [Fact]
+        public async Task ResolvesToTheSameInstanceForSingletonRegistrationsEvenWhenResolvedFromSeparateThreads()
+        {
+            // arrange
+            var container = new DependencyInjectionContainer();
+            container.Register<A, A>(LifecycleType.Singleton);
+
+            // act
+            var task1 = Task.Run<A>(() => container.Resolve<A>());
+            var task2 = Task.Run<A>(() => container.Resolve<A>());
+
+            var a1 = await task1;
+            var a2 = await task2;
 
             // assert
             Assert.NotNull(a1);

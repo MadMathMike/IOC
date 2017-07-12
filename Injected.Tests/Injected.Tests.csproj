@@ -55,6 +55,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DependencyInjectionContainerTests.cs" />
+    <Compile Include="SingletonLifecycleManagerTests.cs" />
     <Compile Include="TestClasses\A.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TestClasses\AbstractClass.cs" />
@@ -63,6 +64,7 @@
     <Compile Include="TestClasses\IA.cs" />
     <Compile Include="TestClasses\NoPublicConstructors.cs" />
     <Compile Include="TestClasses\TwoPublicConstructors.cs" />
+    <Compile Include="TransientLifecycleManagerTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

@@ -9,6 +9,12 @@ namespace Injected
 {
     public class DependencyInjectionContainer
     {
+        // TODO: Consider turning these dictionaries into concurrent dictionaries
+        // I'm not actually sure it is necessary to make these dictionaries thread safe.
+        // From what I've seen of IOC container usage, registration usually happens up front in a single thread, 
+        // so adding to these dictionaries should be fine. Because each of the lifecycle managers has to be thread safe, 
+        // I don't think it matters that multiple threads try to read from the dictionary at the same time.
+
         // TODO: Find a way to merge these two dictionaries
         private Dictionary<Type, ConstructorInfo> constructors = new Dictionary<Type, ConstructorInfo>();
         private Dictionary<Type, ILifecycleManager> lifecycleManagers = new Dictionary<Type, ILifecycleManager>();
