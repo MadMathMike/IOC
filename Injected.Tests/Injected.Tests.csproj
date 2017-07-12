@@ -59,6 +59,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TestClasses\AbstractClass.cs" />
     <Compile Include="TestClasses\B.cs" />
+    <Compile Include="TestClasses\GenericClass.cs" />
     <Compile Include="TestClasses\IA.cs" />
     <Compile Include="TestClasses\NoPublicConstructors.cs" />
     <Compile Include="TestClasses\TwoPublicConstructors.cs" />

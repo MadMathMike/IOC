@@ -58,7 +58,19 @@ namespace Injected
                 throw new TypeNotRegisteredException(typeToResolve);
 
             var constructor = constructors[typeToResolve];
-            var arguments = constructor.GetParameters().Select(p => this.lifecycleManagers[p.ParameterType].GetObject()).ToArray();
+            var constructorParameters = constructor.GetParameters();
+
+            var unregisteredParameterType = constructorParameters
+                                                    .Where(p => !this.lifecycleManagers.ContainsKey(p.ParameterType))
+                                                    .Select(p => p.ParameterType)
+                                                    .FirstOrDefault();
+
+            // TODO: A possible future enhancement could include searching the whole dependency graph 
+            // for unregistered types and throwing an exception that includes all of them
+            if (unregisteredParameterType != null)
+                throw new TypeNotRegisteredException(unregisteredParameterType);
+
+            var arguments = constructorParameters.Select(p => this.lifecycleManagers[p.ParameterType].GetObject()).ToArray();
 
             return constructor.Invoke(arguments);
         }

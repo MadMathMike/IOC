@@ -50,6 +50,21 @@ namespace Injected.Tests
         }
         
         [Fact]
+        public void CanResolveGenericClass()
+        {
+            // arrange
+            var container = new DependencyInjectionContainer();
+            container.Register<GenericClass<IA>, GenericClass<IA>>();
+            container.Register<IA, A>();
+
+            // act
+            var generic = container.Resolve<GenericClass<IA>>();
+
+            // assert
+            Assert.NotNull(generic);
+        }
+
+        [Fact]
         public void DefaultsToTransientLifetimes()
         {
             // arrange
@@ -93,7 +108,47 @@ namespace Injected.Tests
             try
             {
                 var a = container.Resolve<A>();
-                Assert.True(false, $"Type {a} should not be registered, so we should not be able to resolve it from the container.");
+                Assert.True(false, $"Type {typeof(A)} should not be registered, so we should not be able to resolve it from the container.");
+            }
+            catch (TypeNotRegisteredException)
+            {
+                // Do nothing because this is exactly what we wanted.
+            }
+        }
+
+        [Fact]
+        public void ThrowsExceptionWhenResolvingTypeWithUnregisteredDependency()
+        {
+            // arrange
+            var container = new DependencyInjectionContainer();
+            container.Register<B, B>();
+
+            // act
+            try
+            {
+                var b = container.Resolve<B>();
+                Assert.True(false, $"Type {typeof(B)} has an unregistered dependency, so we should not be able to resolve it from the container.");
+            }
+            catch (TypeNotRegisteredException)
+            {
+                // Do nothing because this is exactly what we wanted.
+            }
+        }
+
+        [Fact]
+        public void ThrowsExceptionWhenResolvingUnregisteredGenericType()
+        {
+            // arrange
+            var container = new DependencyInjectionContainer();
+            container.Register<GenericClass<A>, GenericClass<A>>();
+            container.Register<A, A>();
+            
+            // act
+            try
+            {
+                // act
+                var generic = container.Resolve<GenericClass<B>>();
+                Assert.True(false, $"Type {typeof(GenericClass<B>)} should not be registered, so we should not be able to resolve it from the container.");
             }
             catch (TypeNotRegisteredException)
             {
