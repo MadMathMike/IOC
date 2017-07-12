@@ -55,6 +55,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DependencyInjectionContainerTests.cs" />
+    <Compile Include="LifecycleManagerFactoryTests.cs" />
     <Compile Include="SingletonLifecycleManagerTests.cs" />
     <Compile Include="TestClasses\A.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

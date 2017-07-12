@@ -1,235 +1,183 @@
 ﻿using Injected.Tests.TestClasses;
-using System.Threading.Tasks;
 using Xunit;
 
 namespace Injected.Tests
 {
     public class DependencyInjectionContainerTests
     {
-        [Fact]
-        public void CanResolveClasses()
+        public class Resolve
         {
-            // arrange
-            var container = new DependencyInjectionContainer();
-            container.Register<A, A>();
-
-            // act
-            var a = container.Resolve<A>();
-
-            // assert
-            Assert.NotNull(a);
-        }
-
-        [Fact]
-        public void CanResolveInterfaces()
-        {
-            // arrange
-            var container = new DependencyInjectionContainer();
-            container.Register<IA, A>();
-
-            // act
-            var a = container.Resolve<IA>();
-
-            // assert
-            Assert.NotNull(a);
-        }
-
-        [Fact]
-        public void CanResolveClassesWithDependencies()
-        {
-            // arrange
-            var container = new DependencyInjectionContainer();
-            container.Register<IA, A>();
-            container.Register<B, B>();
-
-            // act
-            var b = container.Resolve<B>();
-
-            // assert
-            Assert.NotNull(b);
-        }
-        
-        [Fact]
-        public void CanResolveGenericClass()
-        {
-            // arrange
-            var container = new DependencyInjectionContainer();
-            container.Register<GenericClass<IA>, GenericClass<IA>>();
-            container.Register<IA, A>();
-
-            // act
-            var generic = container.Resolve<GenericClass<IA>>();
-
-            // assert
-            Assert.NotNull(generic);
-        }
-
-        [Fact]
-        public void DefaultsToTransientLifetimes()
-        {
-            // arrange
-            var container = new DependencyInjectionContainer();
-            container.Register<A, A>();
-
-            // act
-            var a1 = container.Resolve<A>();
-            var a2 = container.Resolve<A>();
-
-            // assert
-            Assert.NotNull(a1);
-            Assert.NotNull(a2);
-            Assert.NotEqual(a1, a2);
-        }
-
-        [Fact]
-        public void ResolvesToTheSameInstanceForSingletonRegistrations()
-        {
-            // arrange
-            var container = new DependencyInjectionContainer();
-            container.Register<A, A>(LifecycleType.Singleton);
-
-            // act
-            var a1 = container.Resolve<A>();
-            var a2 = container.Resolve<A>();
-
-            // assert
-            Assert.NotNull(a1);
-            Assert.NotNull(a2);
-            Assert.Equal(a1, a2);
-        }
-
-        // This test is problematic since I'm basically trying to test a race condition. 
-        // This results in false positives in the sense that this test frequently passes even without
-        // the code that is responsible for making sure the test passes (thread safety in the SingletonLifecycleManager).
-        [Fact]
-        public async Task ResolvesToTheSameInstanceForSingletonRegistrationsEvenWhenResolvedFromSeparateThreads()
-        {
-            // arrange
-            var container = new DependencyInjectionContainer();
-            container.Register<A, A>(LifecycleType.Singleton);
-
-            // act
-            var task1 = Task.Run<A>(() => container.Resolve<A>());
-            var task2 = Task.Run<A>(() => container.Resolve<A>());
-
-            var a1 = await task1;
-            var a2 = await task2;
-
-            // assert
-            Assert.NotNull(a1);
-            Assert.NotNull(a2);
-            Assert.Equal(a1, a2);
-        }
-
-        [Fact]
-        public void ThrowsExceptionWhenResolvingUnregisteredType()
-        {
-            // arrange
-            var container = new DependencyInjectionContainer();
-
-            // act
-            try
+            [Fact]
+            public void CanResolveClasses()
             {
-                var a = container.Resolve<A>();
-                Assert.True(false, $"Type {typeof(A)} should not be registered, so we should not be able to resolve it from the container.");
-            }
-            catch (TypeNotRegisteredException)
-            {
-                // Do nothing because this is exactly what we wanted.
-            }
-        }
+                // arrange
+                var container = new DependencyInjectionContainer();
+                container.Register<A, A>();
 
-        [Fact]
-        public void ThrowsExceptionWhenResolvingTypeWithUnregisteredDependency()
-        {
-            // arrange
-            var container = new DependencyInjectionContainer();
-            container.Register<B, B>();
-
-            // act
-            try
-            {
-                var b = container.Resolve<B>();
-                Assert.True(false, $"Type {typeof(B)} has an unregistered dependency, so we should not be able to resolve it from the container.");
-            }
-            catch (TypeNotRegisteredException)
-            {
-                // Do nothing because this is exactly what we wanted.
-            }
-        }
-
-        [Fact]
-        public void ThrowsExceptionWhenResolvingUnregisteredGenericType()
-        {
-            // arrange
-            var container = new DependencyInjectionContainer();
-            container.Register<GenericClass<A>, GenericClass<A>>();
-            container.Register<A, A>();
-            
-            // act
-            try
-            {
                 // act
-                var generic = container.Resolve<GenericClass<B>>();
-                Assert.True(false, $"Type {typeof(GenericClass<B>)} should not be registered, so we should not be able to resolve it from the container.");
+                var a = container.Resolve<A>();
+
+                // assert
+                Assert.NotNull(a);
             }
-            catch (TypeNotRegisteredException)
+
+            [Fact]
+            public void CanResolveInterfaces()
             {
-                // Do nothing because this is exactly what we wanted.
+                // arrange
+                var container = new DependencyInjectionContainer();
+                container.Register<IA, A>();
+
+                // act
+                var a = container.Resolve<IA>();
+
+                // assert
+                Assert.NotNull(a);
+            }
+
+            [Fact]
+            public void CanResolveClassesWithDependencies()
+            {
+                // arrange
+                var container = new DependencyInjectionContainer();
+                container.Register<IA, A>();
+                container.Register<B, B>();
+
+                // act
+                var b = container.Resolve<B>();
+
+                // assert
+                Assert.NotNull(b);
+            }
+
+            [Fact]
+            public void CanResolveGenericClass()
+            {
+                // arrange
+                var container = new DependencyInjectionContainer();
+                container.Register<GenericClass<IA>, GenericClass<IA>>();
+                container.Register<IA, A>();
+
+                // act
+                var generic = container.Resolve<GenericClass<IA>>();
+
+                // assert
+                Assert.NotNull(generic);
+            }
+
+            [Fact]
+            public void ThrowsExceptionWhenResolvingUnregisteredType()
+            {
+                // arrange
+                var container = new DependencyInjectionContainer();
+
+                // act
+                try
+                {
+                    var a = container.Resolve<A>();
+                    Assert.True(false, $"Type {typeof(A)} should not be registered, so we should not be able to resolve it from the container.");
+                }
+                catch (TypeNotRegisteredException)
+                {
+                    // Do nothing because this is exactly what we wanted.
+                }
+            }
+
+            [Fact]
+            public void ThrowsExceptionWhenResolvingTypeWithUnregisteredDependency()
+            {
+                // arrange
+                var container = new DependencyInjectionContainer();
+                container.Register<B, B>();
+
+                // act
+                try
+                {
+                    var b = container.Resolve<B>();
+                    Assert.True(false, $"Type {typeof(B)} has an unregistered dependency, so we should not be able to resolve it from the container.");
+                }
+                catch (TypeNotRegisteredException)
+                {
+                    // Do nothing because this is exactly what we wanted.
+                }
+            }
+
+            [Fact]
+            public void ThrowsExceptionWhenResolvingUnregisteredGenericType()
+            {
+                // arrange
+                var container = new DependencyInjectionContainer();
+                container.Register<GenericClass<A>, GenericClass<A>>();
+                container.Register<A, A>();
+
+                // act
+                try
+                {
+                    // act
+                    var generic = container.Resolve<GenericClass<B>>();
+                    Assert.True(false, $"Type {typeof(GenericClass<B>)} should not be registered, so we should not be able to resolve it from the container.");
+                }
+                catch (TypeNotRegisteredException)
+                {
+                    // Do nothing because this is exactly what we wanted.
+                }
             }
         }
 
-        [Fact]
-        public void ThrowsExceptionWhenRegisteringTypeWithNoPublicConstructors()
+        public class Register
         {
-            // arrange
-            var container = new DependencyInjectionContainer();
+            [Fact]
+            public void ThrowsExceptionWhenRegisteringTypeWithNoPublicConstructors()
+            {
+                // arrange
+                var container = new DependencyInjectionContainer();
 
-            // act
-            try
-            {
-                container.Register<NoPublicConstructors, NoPublicConstructors>();
-                Assert.True(false, $"Type {typeof(NoPublicConstructors)} should not successfully register because it has no public constructors.");
+                // act
+                try
+                {
+                    container.Register<NoPublicConstructors, NoPublicConstructors>();
+                    Assert.True(false, $"Type {typeof(NoPublicConstructors)} should not successfully register because it has no public constructors.");
+                }
+                catch (NoPublicConstructorsException)
+                {
+                    // Do nothing because this is exactly what we wanted.
+                }
             }
-            catch (NoPublicConstructorsException)
-            {
-                // Do nothing because this is exactly what we wanted.
-            }
-        }
-        
-        [Fact]
-        public void ThrowsExceptionWhenRegisteringTypeWithMoreThanOnePublicConstructor()
-        {
-            // arrange
-            var container = new DependencyInjectionContainer();
 
-            // act
-            try
+            [Fact]
+            public void ThrowsExceptionWhenRegisteringTypeWithMoreThanOnePublicConstructor()
             {
-                container.Register<TwoPublicConstructors, TwoPublicConstructors>();
-                Assert.True(false, $"Type {typeof(TwoPublicConstructors)} should not successfully register because it has more than one public constructor.");
-            }
-            catch (MoreThanOnePublicConstructorException)
-            {
-                // Do nothing because this is exactly what we wanted.
-            }
-        }
+                // arrange
+                var container = new DependencyInjectionContainer();
 
-        [Fact]
-        public void ThrowsExceptionWhenRegisteringAbstractClass()
-        {
-            // arrange
-            var container = new DependencyInjectionContainer();
-
-            // act
-            try
-            {
-                container.Register<AbstractClass, AbstractClass>();
-                Assert.True(false, $"Type {typeof(AbstractClass)} should not successfully register because it is abstract.");
+                // act
+                try
+                {
+                    container.Register<TwoPublicConstructors, TwoPublicConstructors>();
+                    Assert.True(false, $"Type {typeof(TwoPublicConstructors)} should not successfully register because it has more than one public constructor.");
+                }
+                catch (MoreThanOnePublicConstructorException)
+                {
+                    // Do nothing because this is exactly what we wanted.
+                }
             }
-            catch (AbstractClassNotAllowedException)
+
+            [Fact]
+            public void ThrowsExceptionWhenRegisteringAbstractClass()
             {
-                // Do nothing because this is exactly what we wanted.
+                // arrange
+                var container = new DependencyInjectionContainer();
+
+                // act
+                try
+                {
+                    container.Register<AbstractClass, AbstractClass>();
+                    Assert.True(false, $"Type {typeof(AbstractClass)} should not successfully register because it is abstract.");
+                }
+                catch (AbstractClassNotAllowedException)
+                {
+                    // Do nothing because this is exactly what we wanted.
+                }
             }
         }
     }
