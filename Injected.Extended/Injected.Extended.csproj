@@ -42,6 +42,7 @@
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ThreadStaticLifecycleManager.cs" />
+    <Compile Include="ThreadStaticLifecycleManagerFactory.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Injected\Injected.csproj">
