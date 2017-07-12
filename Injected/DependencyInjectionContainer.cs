@@ -7,13 +7,10 @@ namespace Injected
 {
     public class DependencyInjectionContainer
     {
-        // TODO: Consider turning these dictionaries into concurrent dictionaries
-        // I'm not actually sure it is necessary to make these dictionaries thread safe.
+        // I don't think it is necessary to try to make these dictionaries thread safe.
         // From what I've seen of IOC container usage, registration usually happens up front in a single thread, 
-        // so adding to these dictionaries should be fine. Because each of the lifecycle managers has to be thread safe, 
-        // I don't think it matters that multiple threads try to read from the dictionary at the same time.
-
-        // TODO: Find a way to merge these two dictionaries
+        // so adding to these dictionaries should be safe. Also, because each of the lifecycle managers has to be 
+        // thread safe, I don't think it matters that multiple threads try to read from the dictionary at the same time.
         private Dictionary<Type, ConstructorInfo> constructors = new Dictionary<Type, ConstructorInfo>();
         private Dictionary<Type, ILifecycleManager> lifecycleManagers = new Dictionary<Type, ILifecycleManager>();
 
@@ -23,7 +20,39 @@ namespace Injected
         {
             var resolvableType = typeof(TResolvable);
             var implementationType = typeof(TImplementation);
+            Func<TResolvable> objectFactory = () => (TResolvable)this.Resolve(resolvableType);
 
+            // This static dependency is most useful in that I can now test the creation of the lifecycle managers separately.
+            // An argument could be made that this is both more and less SOLID: it helps adhere to SRP, but 
+            // it violates dependency inversion (which is a bit ironic given what I'm writing).
+            ILifecycleManager lifecycleManager = LifecycleManagerFactory.CreateLifecycleManager(lifecycleType, objectFactory);
+            RegisterTypes(resolvableType, implementationType, lifecycleManager);
+        }
+
+        public void Register<TResolvable, TImplementation>(ILifecycleManagerFactory<TResolvable> lifecycleManagerFactory)
+            where TResolvable : class
+            where TImplementation : TResolvable
+        {
+            var resolvableType = typeof(TResolvable);
+            var implementationType = typeof(TImplementation);
+            Func<TResolvable> objectFactory = () => (TResolvable)this.Resolve(resolvableType);
+
+            ILifecycleManager lifecycleManager = lifecycleManagerFactory.CreateLifecycleManager(objectFactory);
+            RegisterTypes(resolvableType, implementationType, lifecycleManager);
+        }
+
+        public TResolvable Resolve<TResolvable>()
+        {
+            var typeToResolve = typeof(TResolvable);
+
+            if (!this.lifecycleManagers.ContainsKey(typeToResolve))
+                throw new TypeNotRegisteredException(typeToResolve);
+
+            return (TResolvable)this.lifecycleManagers[typeToResolve].GetObject();
+        }
+
+        private void RegisterTypes(Type resolvableType, Type implementationType, ILifecycleManager lifecycleManager)
+        {
             if (implementationType.IsAbstract)
                 throw new AbstractClassNotAllowedException(implementationType);
 
@@ -40,25 +69,8 @@ namespace Injected
 
             var constructor = constructors.Single();
 
-            Func<TResolvable> objectFactory = () => (TResolvable)this.Resolve(typeof(TResolvable));
-
-            // This static dependency is most useful in that I can now test the creation of the lifecycle managers separately.
-            // An argument could be made that this is both more and less SOLID: it helps adhere to SRP, but 
-            // it violates dependency inversion (which is a bit ironic given what I'm writing).
-            ILifecycleManager lifecycleManager = LifecycleManagerFactory.CreateLifecycleManager(lifecycleType, objectFactory);
-
             this.constructors.Add(resolvableType, constructor);
             this.lifecycleManagers.Add(resolvableType, lifecycleManager);
-        }
-
-        public TResolvable Resolve<TResolvable>()
-        {
-            var typeToResolve = typeof(TResolvable);
-
-            if (!this.lifecycleManagers.ContainsKey(typeToResolve))
-                throw new TypeNotRegisteredException(typeToResolve);
-
-            return (TResolvable)this.lifecycleManagers[typeToResolve].GetObject();
         }
 
         private object Resolve(Type typeToResolve)
@@ -74,7 +86,7 @@ namespace Injected
                                                     .Select(p => p.ParameterType)
                                                     .FirstOrDefault();
 
-            // TODO: A possible future enhancement could include searching the whole dependency graph 
+            // A future enhancement could include searching the whole dependency graph 
             // for unregistered types and throwing an exception that includes all of them
             if (unregisteredParameterType != null)
                 throw new TypeNotRegisteredException(unregisteredParameterType);
