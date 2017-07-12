@@ -5,7 +5,7 @@
         object GetObject();
     }
 
-    public interface ILifecycleManager<T> : ILifecycleManager
+    public interface ILifecycleManager<T> : ILifecycleManager where T : class
     {
         new T GetObject();
     }

@@ -37,8 +37,8 @@ namespace Injected.Tests
                 var singletonLifecycleManager = new SingletonLifecycleManager<A>(factory);
                 
                 // act
-                var task1 = Task.Run<A>(() => singletonLifecycleManager.GetObject());
-                var task2 = Task.Run<A>(() => singletonLifecycleManager.GetObject());
+                var task1 = Task.Run(() => singletonLifecycleManager.GetObject());
+                var task2 = Task.Run(() => singletonLifecycleManager.GetObject());
 
                 var a1 = await task1;
                 var a2 = await task2;
