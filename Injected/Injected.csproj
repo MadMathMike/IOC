@@ -40,18 +40,18 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AbstractClassNotAllowedException.cs" />
+    <Compile Include="Exceptions\AbstractClassNotAllowedException.cs" />
     <Compile Include="DependencyInjectionContainer.cs" />
-    <Compile Include="ILifecycleManager.cs" />
-    <Compile Include="ILifecycleManagerFactory.cs" />
-    <Compile Include="LifecycleManagerFactory.cs" />
-    <Compile Include="LifecycleType.cs" />
-    <Compile Include="MoreThanOnePublicConstructorException.cs" />
-    <Compile Include="NoPublicConstructorsException.cs" />
+    <Compile Include="LifecycleManagement\ILifecycleManager.cs" />
+    <Compile Include="LifecycleManagement\ILifecycleManagerFactory.cs" />
+    <Compile Include="LifecycleManagement\LifecycleManagerFactory.cs" />
+    <Compile Include="LifecycleManagement\LifecycleType.cs" />
+    <Compile Include="Exceptions\MoreThanOnePublicConstructorException.cs" />
+    <Compile Include="Exceptions\NoPublicConstructorsException.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SingletonLifecycleManager.cs" />
-    <Compile Include="TransientLifecycleManager.cs" />
-    <Compile Include="TypeNotRegisteredException.cs" />
+    <Compile Include="LifecycleManagement\SingletonLifecycleManager.cs" />
+    <Compile Include="LifecycleManagement\TransientLifecycleManager.cs" />
+    <Compile Include="Exceptions\TypeNotRegisteredException.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

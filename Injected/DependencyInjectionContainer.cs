@@ -7,10 +7,9 @@ namespace Injected
 {
     public class DependencyInjectionContainer
     {
-        // I don't think it is necessary to try to make these dictionaries thread safe.
-        // From what I've seen of IOC container usage, registration usually happens up front in a single thread, 
-        // so adding to these dictionaries should be safe. Also, because each of the lifecycle managers has to be 
-        // thread safe, I don't think it matters that multiple threads try to read from the dictionary at the same time.
+        // I don't think it is necessary to try to make these dictionaries thread safe (by using concurrent dictionaries, for instance).
+        // I think with my design what matters the most is that each lifecycle manager is a thread safe as needed.
+        // TODO: Maybe find a way to combine these two dictionaries into one. They should always be the same length and contain the same keys, after all.
         private Dictionary<Type, ConstructorInfo> constructors = new Dictionary<Type, ConstructorInfo>();
         private Dictionary<Type, ILifecycleManager> lifecycleManagers = new Dictionary<Type, ILifecycleManager>();
 
@@ -58,7 +57,7 @@ namespace Injected
 
             // Design assumption: Implementation classes must have only one public constructor. 
             // My gut says that if there is more than one public constructor, then the dependencies in the class haven't been made very clear.
-            // Side benefit of checking constructors: it ensures the implmentation type is actually a class (instead of an interface or a delegate, for instance).
+            // Side benefit of checking constructors: it ensures the implementation type is actually a class (instead of an interface or a delegate, for instance).
             var constructors = implementationType.GetConstructors();
 
             if (constructors.Length == 0)
@@ -81,13 +80,13 @@ namespace Injected
             var constructor = constructors[typeToResolve];
             var constructorParameters = constructor.GetParameters();
 
+            // TODO: Enhance this code to search the whole dependency graph 
+            // for unregistered types and throw an exception that includes all of them
             var unregisteredParameterType = constructorParameters
                                                     .Where(p => !this.lifecycleManagers.ContainsKey(p.ParameterType))
                                                     .Select(p => p.ParameterType)
                                                     .FirstOrDefault();
 
-            // A future enhancement could include searching the whole dependency graph 
-            // for unregistered types and throwing an exception that includes all of them
             if (unregisteredParameterType != null)
                 throw new TypeNotRegisteredException(unregisteredParameterType);
 
