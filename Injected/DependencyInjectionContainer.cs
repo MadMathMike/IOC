@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Injected
 {
@@ -42,7 +40,12 @@ namespace Injected
 
             var constructor = constructors.Single();
 
-            ILifecycleManager lifecycleManager = GetLifeCycleManager<TResolvable>(lifecycleType);
+            Func<TResolvable> objectFactory = () => (TResolvable)this.Resolve(typeof(TResolvable));
+
+            // This static dependency is most useful in that I can now test the creation of the lifecycle managers separately.
+            // An argument could be made that this is both more and less SOLID: it helps adhere to SRP, but 
+            // it violates dependency inversion (which is a bit ironic given what I'm writing).
+            ILifecycleManager lifecycleManager = LifecycleManagerFactory.CreateLifecycleManager(lifecycleType, objectFactory);
 
             this.constructors.Add(resolvableType, constructor);
             this.lifecycleManagers.Add(resolvableType, lifecycleManager);
@@ -79,28 +82,6 @@ namespace Injected
             var arguments = constructorParameters.Select(p => this.lifecycleManagers[p.ParameterType].GetObject()).ToArray();
 
             return constructor.Invoke(arguments);
-        }
-
-        // TODO: Consider moving this method into a different class
-        private ILifecycleManager GetLifeCycleManager<TResolvable>(LifecycleType lifecycleType) where TResolvable : class
-        {
-            ILifecycleManager lifecycleManager = null;
-
-            Func<TResolvable> objectFactory = () => (TResolvable)this.Resolve(typeof(TResolvable));
-
-            switch (lifecycleType)
-            {
-                case LifecycleType.Transient:
-                    lifecycleManager = new TransientLifecycleManager<TResolvable>(objectFactory);
-                    break;
-                case LifecycleType.Singleton:
-                    lifecycleManager = new SingletonLifecycleManager<TResolvable>(objectFactory);
-                    break;
-                default:
-                    throw new NotImplementedException($"Lifecycle type {lifecycleType} has not been implemented.");
-            }
-
-            return lifecycleManager;
         }
     }
 }

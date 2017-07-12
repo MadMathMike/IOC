@@ -43,6 +43,7 @@
     <Compile Include="AbstractClassNotAllowedException.cs" />
     <Compile Include="DependencyInjectionContainer.cs" />
     <Compile Include="ILifecycleManager.cs" />
+    <Compile Include="LifecycleManagerFactory.cs" />
     <Compile Include="LifecycleType.cs" />
     <Compile Include="MoreThanOnePublicConstructorException.cs" />
     <Compile Include="NoPublicConstructorsException.cs" />

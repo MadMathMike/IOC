@@ -2,7 +2,7 @@
 
 namespace Injected
 {
-    class TransientLifecycleManager<T> : ILifecycleManager<T>
+    class TransientLifecycleManager<T> : ILifecycleManager<T> where T : class
     {
         private Func<T> factory;
 
