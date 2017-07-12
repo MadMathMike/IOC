@@ -1,5 +1,5 @@
 ﻿using Injected.Extended.Tests.TestClasses;
-using System.Threading.Tasks;
+using System.Threading;
 using Xunit;
 
 namespace Injected.Extended.Tests
@@ -24,17 +24,24 @@ namespace Injected.Extended.Tests
             }
 
             [Fact]
-            public async Task CausesTheContainerToResolveToDifferentInstancesWhenCalledFromDifferentThreads()
+            public void CausesTheContainerToResolveToDifferentInstancesWhenCalledFromDifferentThreads()
             {
                 // arrange
                 var container = new DependencyInjectionContainer();
                 container.Register<A, A>(new ThreadStaticLifecycleManagerFactory<A>());
 
+                A a1 = null;
+                A a2 = null;
+
                 // act
-                var task1 = Task.Run(() => container.Resolve<A>());
-                var task2 = Task.Run(() => container.Resolve<A>());
-                var a1 = await task1;
-                var a2 = await task2;
+                var thread1 = new Thread(() => a1 = container.Resolve<A>());
+                var thread2 = new Thread(() => a2 = container.Resolve<A>());
+
+                thread1.Start();
+                thread2.Start();
+
+                thread1.Join();
+                thread2.Join();
 
                 // assert
                 Assert.NotEqual(a1, a2);

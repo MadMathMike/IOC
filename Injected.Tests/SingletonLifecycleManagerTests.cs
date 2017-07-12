@@ -1,6 +1,6 @@
 ﻿using Injected.Tests.TestClasses;
 using System;
-using System.Threading.Tasks;
+using System.Threading;
 using Xunit;
 
 namespace Injected.Tests
@@ -26,22 +26,28 @@ namespace Injected.Tests
                 Assert.Equal(a1, a2);
             }
 
-            // This test is problematic since I'm basically trying to test a race condition. 
+            // This test is problematic since one thing this tests is a race condition. 
             // I did get the test to fail a few times before I added my code for thread 
             // safety in the SingletonLifecycleManager though.
             [Fact]
-            public async Task ReturnsTheSameInstanceEvenWhenCalledFromSeparateThreads()
+            public void ReturnsTheSameInstanceEvenWhenCalledFromSeparateThreads()
             {
                 // arrange
                 Func<A> factory = () => new A();
                 var singletonLifecycleManager = new SingletonLifecycleManager<A>(factory);
-                
-                // act
-                var task1 = Task.Run(() => singletonLifecycleManager.GetObject());
-                var task2 = Task.Run(() => singletonLifecycleManager.GetObject());
 
-                var a1 = await task1;
-                var a2 = await task2;
+                A a1 = null;
+                A a2 = null;
+
+                // act
+                var thread1 = new Thread(() => a1 = singletonLifecycleManager.GetObject());
+                var thread2 = new Thread(() => a2 = singletonLifecycleManager.GetObject());
+
+                thread1.Start();
+                thread2.Start();
+
+                thread1.Join();
+                thread2.Join();
 
                 // assert
                 Assert.NotNull(a1);

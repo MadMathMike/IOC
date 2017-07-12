@@ -1,6 +1,6 @@
 ﻿using Injected.Extended.Tests.TestClasses;
 using System;
-using System.Threading.Tasks;
+using System.Threading;
 using Xunit;
 
 namespace Injected.Extended.Tests
@@ -25,17 +25,24 @@ namespace Injected.Extended.Tests
             }
 
             [Fact]
-            public async Task ReturnsDifferentObjectsWhenCalledOnDifferentThreads()
+            public void ReturnsDifferentObjectsWhenCalledOnDifferentThreads()
             {
                 // arrange
                 Func<A> factory = () => new A();
                 var threadStaticLifecycleManager = new ThreadStaticLifecycleManager<A>(factory);
 
+                A a1 = null;
+                A a2 = null;
+
                 // act
-                var task1 = Task.Run(() => threadStaticLifecycleManager.GetObject());
-                var task2 = Task.Run(() => threadStaticLifecycleManager.GetObject());
-                var a1 = await task1;
-                var a2 = await task2;
+                var thread1 = new Thread(() => a1 = threadStaticLifecycleManager.GetObject());
+                var thread2 = new Thread(() => a2 = threadStaticLifecycleManager.GetObject());
+
+                thread1.Start();
+                thread2.Start();
+
+                thread1.Join();
+                thread2.Join();
 
                 // assert
                 Assert.NotEqual(a1, a2);
